@@ -17,8 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased">
         <div className="flex min-h-screen">
           <Sidebar />
-          <main className="flex-1 min-w-0 overflow-auto">{children}</main>
+          <main className="flex-1 min-w-0 overflow-auto" style={{ paddingTop: "var(--mobile-header-h, 0px)" }}>{children}</main>
         </div>
+        <style>{`@media (max-width: 767px) { :root { --mobile-header-h: 52px; } }`}</style>
       </body>
     </html>
   );
