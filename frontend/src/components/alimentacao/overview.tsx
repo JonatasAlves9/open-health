@@ -396,11 +396,12 @@ function MonthlyTable({ history, target }: { history: HistoryDay[]; target: numb
   });
   const rows = Object.values(byMonth).sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 6);
 
+  const COL = "1.2fr 0.8fr 0.8fr 0.8fr 1.4fr 0.6fr";
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", minWidth: 520 }}>
       <div style={{
-        display: "grid", gridTemplateColumns: "1.2fr 0.8fr 0.8fr 0.8fr 1.5fr 0.6fr",
-        gap: 16, padding: "8px 0",
+        display: "grid", gridTemplateColumns: COL,
+        gap: 12, padding: "8px 0",
         fontSize: 10.5, fontFamily: "var(--font-geist-mono)", color: "var(--oh-fg-4)",
         textTransform: "uppercase", letterSpacing: "0.1em",
         borderBottom: "1px solid var(--oh-border)",
@@ -420,8 +421,8 @@ function MonthlyTable({ history, target }: { history: HistoryDay[]; target: numb
         const delta = avg - target;
         return (
           <div key={r.key} style={{
-            display: "grid", gridTemplateColumns: "1.2fr 0.8fr 0.8fr 0.8fr 1.5fr 0.6fr",
-            gap: 16, padding: "12px 0", alignItems: "center",
+            display: "grid", gridTemplateColumns: COL,
+            gap: 12, padding: "12px 0", alignItems: "center",
             borderBottom: i < rows.length - 1 ? "1px solid var(--oh-border)" : "none",
             fontSize: 13, fontVariantNumeric: "tabular-nums",
           }}>
@@ -493,16 +494,17 @@ function RangeTabs({ value, onChange }: { value: RangeId; onChange: (v: RangeId)
     { id: "180", label: "6 meses" },
   ];
   return (
-    <div style={{ position: "relative", display: "inline-flex", padding: 4, background: "var(--oh-bg-2)", border: "1px solid var(--oh-border)", borderRadius: 12, gap: 2 }}>
+    <div style={{ display: "flex", padding: 4, background: "var(--oh-bg-2)", border: "1px solid var(--oh-border)", borderRadius: 12, gap: 2, flexWrap: "wrap" }}>
       {tabs.map(t => (
         <button key={t.id} onClick={() => onChange(t.id)}
           style={{
-            padding: "7px 14px", border: "none",
+            padding: "6px 12px", border: "none",
             background: value === t.id ? "var(--oh-bg-3)" : "transparent",
             color: value === t.id ? "var(--oh-fg)" : "var(--oh-fg-3)",
-            fontSize: 13, fontWeight: 500, borderRadius: 9,
+            fontSize: 12.5, fontWeight: 500, borderRadius: 9,
             cursor: "pointer", transition: "all 0.2s",
             outline: value === t.id ? "1px solid var(--oh-border-strong)" : "none",
+            whiteSpace: "nowrap",
           }}
         >{t.label}</button>
       ))}
@@ -570,8 +572,8 @@ export function OverviewSection({ targets, onGoToToday }: { targets: DailyTarget
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em", color: "var(--oh-fg)" }}>Panorama</h2>
           <span style={{ fontSize: 12, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)" }}>
             {fmtShortDate(windowed[0].date)} — {fmtShortDate(windowed[windowed.length - 1].date)}
@@ -595,41 +597,43 @@ export function OverviewSection({ targets, onGoToToday }: { targets: DailyTarget
       </div>
 
       {/* Line chart */}
-      <div className="oh-glass" style={{ padding: 22, borderRadius: 18 }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--oh-fg)" }}>Calorias por dia</div>
-            <div style={{ fontSize: 12, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", marginTop: 2 }}>
-              Linha horizontal = meta de {targets.kcal.toLocaleString("pt-BR")} kcal
+      <div className="oh-glass" style={{ padding: "18px 20px", borderRadius: 18 }}>
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--oh-fg)" }}>Calorias por dia</div>
+              <div style={{ fontSize: 12, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", marginTop: 2 }}>
+                Meta: {targets.kcal.toLocaleString("pt-BR")} kcal/dia
+              </div>
             </div>
+            <Legend items={[
+              { label: "Consumido",            color: "var(--oh-fg)" },
+              { label: "Meta",                 color: "var(--oh-fg-4)", dashed: true },
+              { label: "±10%",                 color: "var(--oh-success)", swatch: "dot" },
+            ]} />
           </div>
-          <Legend items={[
-            { label: "Consumido",           color: "var(--oh-fg)" },
-            { label: "Meta",                color: "var(--oh-fg-4)", dashed: true },
-            { label: "Dentro da faixa ±10%", color: "var(--oh-success)", swatch: "dot" },
-          ]} />
         </div>
         <LineChart data={windowed} target={targets.kcal} />
       </div>
 
       {/* Heatmap + macro mix */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", gap: 16 }}>
-        <div className="oh-glass" style={{ padding: 22, borderRadius: 18 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 16 }}>
+        <div className="oh-glass" style={{ padding: "18px 20px", borderRadius: 18, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: "var(--oh-fg)" }}>Consistência</div>
               <div style={{ fontSize: 12, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", marginTop: 2 }}>
-                Cada quadrado é um dia · mais escuro = mais próximo da meta
+                Cada quadrado = 1 dia · mais escuro = mais próximo da meta
               </div>
             </div>
-            <span style={{ fontSize: 11, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)" }}>
-              {stats.targetHitPct}% dentro da faixa
+            <span style={{ fontSize: 11, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", flexShrink: 0 }}>
+              {stats.targetHitPct}% na faixa
             </span>
           </div>
           <Heatmap history={history.slice(-182)} target={targets.kcal} />
         </div>
 
-        <div className="oh-glass" style={{ padding: 22, borderRadius: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className="oh-glass" style={{ padding: "18px 20px", borderRadius: 18, display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: "var(--oh-fg)" }}>Mix de macros médio</div>
             <div style={{ fontSize: 12, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", marginTop: 2 }}>
@@ -641,17 +645,19 @@ export function OverviewSection({ targets, onGoToToday }: { targets: DailyTarget
       </div>
 
       {/* Monthly breakdown */}
-      <div className="oh-glass" style={{ padding: 22, borderRadius: 18 }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
+      <div className="oh-glass" style={{ padding: "18px 20px", borderRadius: 18 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: "var(--oh-fg)" }}>Resumo por mês</div>
           {onGoToToday && (
             <button onClick={onGoToToday}
-              style={{ background: "transparent", border: "1px solid var(--oh-border)", borderRadius: 8, padding: "5px 10px", fontSize: 12.5, color: "var(--oh-fg-3)", cursor: "pointer", fontFamily: "var(--font-geist-sans)" }}>
-              Ir para Hoje →
+              style={{ background: "transparent", border: "1px solid var(--oh-border)", borderRadius: 8, padding: "5px 10px", fontSize: 12.5, color: "var(--oh-fg-3)", cursor: "pointer", fontFamily: "var(--font-geist-sans)", flexShrink: 0 }}>
+              Hoje →
             </button>
           )}
         </div>
-        <MonthlyTable history={history} target={targets.kcal} />
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
+          <MonthlyTable history={history} target={targets.kcal} />
+        </div>
       </div>
 
       {/* Insights */}

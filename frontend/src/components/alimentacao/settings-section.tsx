@@ -93,7 +93,7 @@ export function SettingsSection({ targets, onChange, onReset }: Props) {
           <span style={{ fontSize: 14, fontWeight: 600, color: "var(--oh-fg)" }}>Presets rápidos</span>
           <span style={{ fontSize: 11, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)" }}>Aplica e você pode ajustar depois</span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 160px), 1fr))", gap: 10 }}>
           {PRESETS.map(p => (
             <button key={p.id}
               onClick={() => onChange({ kcal: p.kcal, prot: p.prot, carb: p.carb, fat: p.fat })}
@@ -127,7 +127,7 @@ export function SettingsSection({ targets, onChange, onReset }: Props) {
       </div>
 
       {/* Editor + Distribution */}
-      <div className="oh-glass" style={{ padding: 20, borderRadius: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div className="oh-glass" style={{ padding: 20, borderRadius: 16, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: 20 }}>
         {/* Fields */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
