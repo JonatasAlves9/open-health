@@ -4,7 +4,7 @@ import { MacroRing } from "./macro-ring";
 import type { Meal } from "@/lib/api";
 
 type Macros = { kcal: number; prot: number; carb: number; fat: number };
-const TARGETS = { kcal: 2000, prot: 150, carb: 220, fat: 65 };
+type Targets = { kcal: number; prot: number; carb: number; fat: number };
 
 function MacroBar({ label, consumed, target, color }: { label: string; consumed: number; target: number; color: string }) {
   const pct = Math.min((consumed / (target || 1)) * 100, 100);
@@ -71,38 +71,43 @@ function DayTimeline({ meals }: { meals: Meal[] }) {
   );
 }
 
-export function DaySummary({ totals, meals }: { totals: Macros; meals: Meal[] }) {
+export function DaySummary({ totals, meals, targets }: { totals: Macros; meals: Meal[]; targets: Targets }) {
+  const remaining = Math.max(0, Math.round(targets.kcal - totals.kcal));
   return (
     <div className="oh-glass oh-fade-in" style={{
-      marginTop: 20, padding: 24, borderRadius: 20,
-      display: "grid", gridTemplateColumns: "auto 1fr auto",
-      gap: 32, alignItems: "center",
+      marginTop: 20, padding: "20px 22px", borderRadius: 20,
       boxShadow: "var(--oh-shadow-sm)",
     }}>
-      {/* Ring */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <MacroRing consumed={totals.kcal} target={TARGETS.kcal} size={160} stroke={12} />
-        <div style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 11, color: "var(--oh-fg-3)", fontFamily: "var(--font-geist-mono)" }}>
-          <span style={{ fontVariantNumeric: "tabular-nums" }}>
-            {Math.max(0, Math.round(TARGETS.kcal - totals.kcal))} kcal restantes
-          </span>
+      {/* Desktop: 3-col grid; Mobile: stacked */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
+        gap: 24,
+        alignItems: "center",
+      }}>
+        {/* Ring */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+          <MacroRing consumed={totals.kcal} target={targets.kcal} size={148} stroke={11} />
+          <div style={{ fontSize: 11, color: "var(--oh-fg-3)", fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums" }}>
+            {remaining} kcal restantes
+          </div>
         </div>
-      </div>
 
-      {/* Macro bars */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 13, fontWeight: 500, color: "var(--oh-fg)" }}>Macronutrientes</span>
-          <span style={{ fontSize: 11, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Meta diária</span>
+        {/* Macro bars */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--oh-fg)" }}>Macronutrientes</span>
+            <span style={{ fontSize: 11, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Meta diária</span>
+          </div>
+          <MacroBar label="Proteína"    consumed={totals.prot} target={targets.prot} color="var(--oh-protein)" />
+          <MacroBar label="Carboidrato" consumed={totals.carb} target={targets.carb} color="var(--oh-carbs)" />
+          <MacroBar label="Gordura"     consumed={totals.fat}  target={targets.fat}  color="var(--oh-fat)" />
         </div>
-        <MacroBar label="Proteína" consumed={totals.prot} target={TARGETS.prot} color="var(--oh-protein)" />
-        <MacroBar label="Carboidrato" consumed={totals.carb} target={TARGETS.carb} color="var(--oh-carbs)" />
-        <MacroBar label="Gordura" consumed={totals.fat} target={TARGETS.fat} color="var(--oh-fat)" />
-      </div>
 
-      {/* Timeline */}
-      <div style={{ width: 220 }}>
-        <DayTimeline meals={meals} />
+        {/* Timeline */}
+        <div style={{ minWidth: 0 }}>
+          <DayTimeline meals={meals} />
+        </div>
       </div>
     </div>
   );

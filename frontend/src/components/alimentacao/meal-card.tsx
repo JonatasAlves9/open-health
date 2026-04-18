@@ -122,22 +122,24 @@ export function MealCard({ meal, onEdit, onRemove }: Props) {
             const m = itemMacros(item);
             return (
               <div key={item.id} style={{
-                display: "grid", gridTemplateColumns: "1fr auto auto",
-                gap: 14, alignItems: "center", padding: "5px 0", fontSize: 13,
+                display: "grid", gridTemplateColumns: "1fr auto",
+                gap: 10, alignItems: "center", padding: "5px 0", fontSize: 13,
               }}>
-                <span style={{ color: "var(--oh-fg-2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.food.name}</span>
-                <span style={{ fontSize: 11, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
-                  <span style={{ color: "var(--oh-protein)" }}>{m.prot.toFixed(1)}</span>P ·{" "}
-                  <span style={{ color: "var(--oh-carbs)" }}>{m.carb.toFixed(1)}</span>C ·{" "}
-                  <span style={{ color: "var(--oh-fat)" }}>{m.fat.toFixed(1)}</span>G
-                </span>
-                <span style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums" }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ color: "var(--oh-fg-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 2 }}>{item.food.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums" }}>
+                    <span style={{ color: "var(--oh-protein)" }}>{m.prot.toFixed(1)}</span>P ·{" "}
+                    <span style={{ color: "var(--oh-carbs)" }}>{m.carb.toFixed(1)}</span>C ·{" "}
+                    <span style={{ color: "var(--oh-fat)" }}>{m.fat.toFixed(1)}</span>G
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums", flexShrink: 0 }}>
                   <span style={{
                     padding: "2px 7px", background: "var(--oh-bg-3)", color: "var(--oh-fg-2)",
                     border: "1px solid var(--oh-border)", borderRadius: 6, fontSize: 10.5, fontWeight: 500,
                   }}>{formatQuantity(item.quantity, item.unit)}</span>
-                  <span style={{ fontSize: 12, color: "var(--oh-fg-3)", width: 64, textAlign: "right" }}>{Math.round(m.kcal)} kcal</span>
-                </span>
+                  <span style={{ fontSize: 11.5, color: "var(--oh-fg-3)" }}>{Math.round(m.kcal)} kcal</span>
+                </div>
               </div>
             );
           })}

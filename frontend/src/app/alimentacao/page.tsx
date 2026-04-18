@@ -45,7 +45,7 @@ export default function AlimentacaoPage() {
     <>
       <NewMealDialog open={showDialog} onClose={() => setShowDialog(false)} onSaved={() => {}} defaultTemplate={section === "saved"} />
 
-      <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      <div style={{ display: "flex", height: "calc(100vh - var(--mobile-header-h, 0px))", overflow: "hidden" }}>
         <SubSidebar
           current={section}
           onChange={setSection}
@@ -54,7 +54,7 @@ export default function AlimentacaoPage() {
 
         <div style={{
           flex: 1, minWidth: 0, overflowY: "auto",
-          padding: `${36 * density}px ${44 * density}px ${80 * density}px`,
+          padding: "clamp(16px, 4vw, 36px) clamp(14px, 4vw, 44px) max(80px, env(safe-area-inset-bottom, 0px) + 80px)",
         }}>
           {/* Page header */}
           <div style={{ marginBottom: 28, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
@@ -100,7 +100,7 @@ export default function AlimentacaoPage() {
             <OverviewSection targets={targets} onGoToToday={() => setSection("today")} />
           )}
           {section === "today" && (
-            <MealLog onNewMeal={() => setShowDialog(true)} />
+            <MealLog onNewMeal={() => setShowDialog(true)} targets={targets} />
           )}
           {section === "saved" && (
             <MealTemplates />

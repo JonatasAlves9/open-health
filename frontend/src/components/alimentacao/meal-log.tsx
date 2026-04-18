@@ -8,6 +8,7 @@ import { Utensils } from "lucide-react";
 import { MealCard } from "./meal-card";
 import { DaySummary } from "./day-summary";
 import { NewMealDialog } from "./new-meal-dialog";
+import type { DailyTargets } from "./settings-section";
 
 function todayISO() { return new Date().toISOString().split("T")[0]; }
 
@@ -21,7 +22,8 @@ function calcMacros(meal: Meal) {
   );
 }
 
-export function MealLog({ onNewMeal }: { onNewMeal?: () => void }) {
+export function MealLog({ onNewMeal, targets }: { onNewMeal?: () => void; targets?: DailyTargets }) {
+  const effectiveTargets = targets ?? { kcal: 2000, prot: 150, carb: 220, fat: 65 };
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -53,7 +55,7 @@ export function MealLog({ onNewMeal }: { onNewMeal?: () => void }) {
           <Skeleton className="h-[188px] w-full rounded-[20px]" style={{ background: "var(--oh-bg-3)" }} />
         </div>
       ) : (
-        <DaySummary totals={dayTotals} meals={meals} />
+        <DaySummary totals={dayTotals} meals={meals} targets={effectiveTargets} />
       )}
 
       {/* Meals list */}
