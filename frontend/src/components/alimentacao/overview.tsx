@@ -39,7 +39,7 @@ function isoDate(d: Date) { return d.toISOString().split("T")[0]; }
 const fmtMonth = (d: Date) => d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
 const fmtShortDate = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
 
-const bestDayOfWeek = (windowed: ReturnType<typeof buildHistory>, target: number) => {
+const bestDayOfWeek = (windowed: HistoryDay[], target: number) => {
   const byDow = Array.from({ length: 7 }, () => ({ sum: 0, n: 0 }));
   windowed.filter(d => d.logged).forEach(d => {
     byDow[d.date.getDay()].sum += Math.abs(d.kcal - target);
