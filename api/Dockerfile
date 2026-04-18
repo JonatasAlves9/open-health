@@ -16,7 +16,7 @@ RUN apk add --no-cache python3 make g++ && \
     adduser -S nodejs -u 1001
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/src/db/migrations ./src/db/migrations
+COPY --from=builder /app/src/db/migrations ./dist/db/migrations
 RUN mkdir -p /data && chown nodejs:nodejs /data
 ENV NODE_ENV=production
 ENV DATABASE_URL=/data/open-health.db
