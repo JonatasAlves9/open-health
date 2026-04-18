@@ -10,17 +10,22 @@ async function proxy(req: NextRequest): Promise<NextResponse> {
   const headers = new Headers(req.headers);
   headers.delete("host");
 
-  const res = await fetch(target, {
-    method: req.method,
-    headers,
-    body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
-    duplex: "half",
-  } as RequestInit);
+  try {
+    const res = await fetch(target, {
+      method: req.method,
+      headers,
+      body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
+      duplex: "half",
+      cache: "no-store",
+    } as RequestInit);
 
-  return new NextResponse(res.body, {
-    status: res.status,
-    headers: res.headers,
-  });
+    return new NextResponse(res.body, {
+      status: res.status,
+      headers: res.headers,
+    });
+  } catch {
+    return NextResponse.json({ error: `API unavailable: ${API_URL}` }, { status: 503 });
+  }
 }
 
 export const GET = proxy;

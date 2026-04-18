@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" className={`${geist.variable} ${geistMono.variable}`}>
       <body className="antialiased">
-        <div className="flex min-h-screen">
+        <div className="flex" style={{ height: "100dvh" }}>
           <Sidebar />
           <main className="flex-1 min-w-0 overflow-auto" style={{ paddingTop: "var(--mobile-header-h, 0px)" }}>{children}</main>
         </div>
