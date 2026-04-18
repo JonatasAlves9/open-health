@@ -8,18 +8,15 @@ services:
       NODE_ENV: production
       DATABASE_URL: /data/open-health.db
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      PORT: ${API_PORT:-3001}
-    ports:
-      - "${API_PORT:-3001}:3001"
 
   frontend:
     image: ghcr.io/jonatasalves9/open-health-frontend:latest
     restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      API_URL: http://api:3001
     depends_on:
       - api
 
