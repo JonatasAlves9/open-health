@@ -25,6 +25,7 @@ export default function AlimentacaoPage() {
   const [section, setSection] = useState<SectionId>("overview");
   const [showDialog, setShowDialog] = useState(false);
   const [targets, setTargets] = useState<DailyTargets>(DEFAULT_TARGETS);
+  const [mealVersion, setMealVersion] = useState(0);
 
   useEffect(() => {
     api.settings.get().then(s => {
@@ -43,7 +44,7 @@ export default function AlimentacaoPage() {
 
   return (
     <>
-      <NewMealDialog open={showDialog} onClose={() => setShowDialog(false)} onSaved={() => {}} defaultTemplate={section === "saved"} />
+      <NewMealDialog open={showDialog} onClose={() => setShowDialog(false)} onSaved={() => setMealVersion(v => v + 1)} defaultTemplate={section === "saved"} />
 
       <div style={{ display: "flex", height: "calc(100vh - var(--mobile-header-h, 0px))", overflow: "hidden" }}>
         <SubSidebar
@@ -97,7 +98,7 @@ export default function AlimentacaoPage() {
 
           {/* Section content */}
           {section === "overview" && (
-            <OverviewSection targets={targets} onGoToToday={() => setSection("today")} />
+            <OverviewSection key={mealVersion} targets={targets} onGoToToday={() => setSection("today")} />
           )}
           {section === "today" && (
             <MealLog onNewMeal={() => setShowDialog(true)} targets={targets} />

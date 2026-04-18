@@ -18,7 +18,7 @@ function buildHistoryFromApi(data: DailyNutrition[], days: number): HistoryDay[]
   for (let i = days; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    const key = d.toISOString().split("T")[0];
+    const key = isoDate(d);
     const entry = map.get(key);
     out.push({
       date: d,
@@ -519,15 +519,19 @@ export function OverviewSection({ targets, onGoToToday }: { targets: DailyTarget
   const [range, setRange] = useState<RangeId>("30");
   const [apiData, setApiData] = useState<DailyNutrition[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     const today = new Date();
     const from = new Date(today);
     from.setDate(today.getDate() - 180);
+    const fromStr = isoDate(from);
+    const toStr = isoDate(today);
     setLoading(true);
-    api.nutrition.daily({ from: isoDate(from), to: isoDate(today) })
+    setFetchError(null);
+    api.nutrition.daily({ from: fromStr, to: toStr })
       .then(d => { setApiData(d); setLoading(false); })
-      .catch(() => setLoading(false));
+      .catch(e => { setFetchError(String(e)); setLoading(false); });
   }, []);
 
   const history = useMemo(() => buildHistoryFromApi(apiData, 180), [apiData]);
@@ -557,6 +561,14 @@ export function OverviewSection({ targets, onGoToToday }: { targets: DailyTarget
 
     return { avgKcal, avgProt, adherencePct, targetHitPct, deltaKcal, streak, loggedDays: loggedDays.length };
   }, [windowed, history, targets]);
+
+  if (fetchError) {
+    return (
+      <div style={{ padding: 24, borderRadius: 14, background: "var(--oh-bg-3)", border: "1px solid var(--oh-border)", color: "var(--oh-danger)", fontSize: 13, fontFamily: "var(--font-geist-mono)" }}>
+        Erro ao carregar dados: {fetchError}
+      </div>
+    );
+  }
 
   if (loading) {
     return (
