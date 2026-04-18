@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { api, type Food, type Meal } from "@/lib/api";
+import { itemMacros } from "@/lib/nutrition";
 import { Search, Trash2, X, Check, ChevronRight } from "lucide-react";
 
 const UNITS = ["g", "ml", "unidade", "colher_sopa", "colher_cha", "xicara"] as const;
@@ -85,8 +86,8 @@ export function NewMealDialog({ open, onClose, onSaved, defaultTemplate = false,
     setItems(p => p.map(i => i.food.id === id ? { ...i, [field]: value } : i));
   }
 
-  const totalKcal = items.reduce((s, i) => s + ((i.food.caloriesPer100g ?? 0) * i.quantity) / 100, 0);
-  const totalProt = items.reduce((s, i) => s + ((i.food.proteinPer100g ?? 0) * i.quantity) / 100, 0);
+  const totalKcal = items.reduce((s, i) => s + itemMacros(i).kcal, 0);
+  const totalProt = items.reduce((s, i) => s + itemMacros(i).prot, 0);
 
   async function handleSave() {
     if (!name.trim() || items.length === 0) return;
@@ -267,8 +268,7 @@ export function NewMealDialog({ open, onClose, onSaved, defaultTemplate = false,
                 }}>Nenhum item adicionado ainda</div>
               )}
               {items.map(item => {
-                const kcal = ((item.food.caloriesPer100g ?? 0) * item.quantity) / 100;
-                const prot = ((item.food.proteinPer100g ?? 0) * item.quantity) / 100;
+                const { kcal, prot } = itemMacros(item);
                 return (
                   <div key={item.food.id} className="oh-fade-in" style={{
                     padding: 14, borderRadius: 12, background: "var(--oh-bg-3)",

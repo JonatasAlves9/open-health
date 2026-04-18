@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { type Meal } from "@/lib/api";
+import { itemMacros, formatQuantity } from "@/lib/nutrition";
 import { Utensils, Sunrise, Sunset, Apple, Edit2, Trash2, Clock } from "lucide-react";
 
 const MEAL_ICONS: Record<string, React.ElementType> = {
@@ -22,12 +23,10 @@ function guessMealType(loggedAt: string | null) {
 
 function calcMacros(meal: Meal) {
   return (meal.items ?? []).reduce(
-    (acc, item) => ({
-      kcal: acc.kcal + ((item.food.caloriesPer100g ?? 0) * item.quantity) / 100,
-      prot: acc.prot + ((item.food.proteinPer100g ?? 0) * item.quantity) / 100,
-      carb: acc.carb + ((item.food.carbsPer100g ?? 0) * item.quantity) / 100,
-      fat:  acc.fat  + ((item.food.fatPer100g  ?? 0) * item.quantity) / 100,
-    }),
+    (acc, item) => {
+      const m = itemMacros(item);
+      return { kcal: acc.kcal + m.kcal, prot: acc.prot + m.prot, carb: acc.carb + m.carb, fat: acc.fat + m.fat };
+    },
     { kcal: 0, prot: 0, carb: 0, fat: 0 }
   );
 }
@@ -120,10 +119,7 @@ export function MealCard({ meal, onEdit, onRemove }: Props) {
       {(meal.items ?? []).length > 0 && (
         <div style={{ marginTop: 14, borderTop: "1px solid var(--oh-border)", paddingTop: 12, display: "flex", flexDirection: "column", gap: 4 }}>
           {meal.items!.map((item) => {
-            const kcal = ((item.food.caloriesPer100g ?? 0) * item.quantity) / 100;
-            const prot = ((item.food.proteinPer100g ?? 0) * item.quantity) / 100;
-            const carb = ((item.food.carbsPer100g ?? 0) * item.quantity) / 100;
-            const fat  = ((item.food.fatPer100g  ?? 0) * item.quantity) / 100;
+            const m = itemMacros(item);
             return (
               <div key={item.id} style={{
                 display: "grid", gridTemplateColumns: "1fr auto auto",
@@ -131,16 +127,16 @@ export function MealCard({ meal, onEdit, onRemove }: Props) {
               }}>
                 <span style={{ color: "var(--oh-fg-2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.food.name}</span>
                 <span style={{ fontSize: 11, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
-                  <span style={{ color: "var(--oh-protein)" }}>{prot.toFixed(1)}</span>P ·{" "}
-                  <span style={{ color: "var(--oh-carbs)" }}>{carb.toFixed(1)}</span>C ·{" "}
-                  <span style={{ color: "var(--oh-fat)" }}>{fat.toFixed(1)}</span>G
+                  <span style={{ color: "var(--oh-protein)" }}>{m.prot.toFixed(1)}</span>P ·{" "}
+                  <span style={{ color: "var(--oh-carbs)" }}>{m.carb.toFixed(1)}</span>C ·{" "}
+                  <span style={{ color: "var(--oh-fat)" }}>{m.fat.toFixed(1)}</span>G
                 </span>
                 <span style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-geist-mono)", fontVariantNumeric: "tabular-nums" }}>
                   <span style={{
                     padding: "2px 7px", background: "var(--oh-bg-3)", color: "var(--oh-fg-2)",
                     border: "1px solid var(--oh-border)", borderRadius: 6, fontSize: 10.5, fontWeight: 500,
-                  }}>{item.quantity}{item.unit === "g" || item.unit === "ml" ? item.unit : ` ${item.unit}`}</span>
-                  <span style={{ fontSize: 12, color: "var(--oh-fg-3)", width: 64, textAlign: "right" }}>{Math.round(kcal)} kcal</span>
+                  }}>{formatQuantity(item.quantity, item.unit)}</span>
+                  <span style={{ fontSize: 12, color: "var(--oh-fg-3)", width: 64, textAlign: "right" }}>{Math.round(m.kcal)} kcal</span>
                 </span>
               </div>
             );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { api, type Meal } from "@/lib/api";
+import { itemMacros } from "@/lib/nutrition";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Utensils } from "lucide-react";
 import { MealCard } from "./meal-card";
@@ -12,12 +13,10 @@ function todayISO() { return new Date().toISOString().split("T")[0]; }
 
 function calcMacros(meal: Meal) {
   return (meal.items ?? []).reduce(
-    (acc, item) => ({
-      kcal: acc.kcal + ((item.food.caloriesPer100g ?? 0) * item.quantity) / 100,
-      prot: acc.prot + ((item.food.proteinPer100g ?? 0) * item.quantity) / 100,
-      carb: acc.carb + ((item.food.carbsPer100g ?? 0) * item.quantity) / 100,
-      fat:  acc.fat  + ((item.food.fatPer100g  ?? 0) * item.quantity) / 100,
-    }),
+    (acc, item) => {
+      const m = itemMacros(item);
+      return { kcal: acc.kcal + m.kcal, prot: acc.prot + m.prot, carb: acc.carb + m.carb, fat: acc.fat + m.fat };
+    },
     { kcal: 0, prot: 0, carb: 0, fat: 0 }
   );
 }
