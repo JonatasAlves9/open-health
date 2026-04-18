@@ -1,7 +1,7 @@
 import { db } from "../db/index.js";
 import { foods } from "../db/schema.js";
 import { eq } from "drizzle-orm";
-import tacoData from "../data/taco.json" assert { type: "json" };
+import tacoData from "../data/taco.json" with { type: "json" };
 
 async function seed() {
   console.log(`Importando ${tacoData.length} alimentos da tabela TACO...`);
