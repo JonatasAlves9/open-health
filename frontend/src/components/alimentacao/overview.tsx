@@ -1,35 +1,39 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Flame } from "lucide-react";
+import { api, type DailyNutrition } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { DailyTargets } from "./settings-section";
 
-/* ── Synthetic history ─────────────────────────────────── */
-function buildHistory(targetKcal: number, targetProt: number) {
-  const out: Array<{
-    date: Date; kcal: number; prot: number; carb: number; fat: number;
-    meals: number; logged: boolean;
-  }> = [];
-  const today = new Date();
-  const seed = (n: number) => { const x = Math.sin(n * 9301 + 49297) * 233280; return x - Math.floor(x); };
+type HistoryDay = {
+  date: Date; kcal: number; prot: number; carb: number; fat: number;
+  meals: number; logged: boolean;
+};
 
-  for (let i = 180; i >= 0; i--) {
-    const d = new Date(today); d.setDate(today.getDate() - i);
-    const dow = d.getDay();
-    const weekend = dow === 0 || dow === 6;
-    const trend = 0.78 + ((180 - i) / 180) * 0.18;
-    const weekendBoost = weekend ? 0.12 : 0;
-    const noise = (seed(i) - 0.5) * 0.22;
-    const factor = Math.max(0.3, trend + weekendBoost + noise);
-    const kcal = i === 0 ? 1086 : Math.round(targetKcal * factor);
-    const prot = i === 0 ? 130 : Math.round(targetProt * Math.max(0.5, trend + noise * 0.5));
-    const carb = Math.round(kcal * 0.48 / 4);
-    const fat  = Math.round(kcal * 0.28 / 9);
-    const meals = i === 0 ? 1 : Math.max(1, 3 + Math.round((seed(i + 7) - 0.5) * 2));
-    out.push({ date: d, kcal, prot, carb, fat, meals, logged: seed(i + 3) > 0.08 || i < 14 });
+function buildHistoryFromApi(data: DailyNutrition[], days: number): HistoryDay[] {
+  const map = new Map(data.map(d => [d.date, d]));
+  const today = new Date();
+  const out: HistoryDay[] = [];
+  for (let i = days; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().split("T")[0];
+    const entry = map.get(key);
+    out.push({
+      date: d,
+      kcal: entry?.kcal ?? 0,
+      prot: entry?.prot ?? 0,
+      carb: entry?.carb ?? 0,
+      fat:  entry?.fat  ?? 0,
+      meals: entry?.meals ?? 0,
+      logged: !!entry,
+    });
   }
   return out;
 }
+
+function isoDate(d: Date) { return d.toISOString().split("T")[0]; }
 
 /* ── Formatters ─────────────────────────────────────────── */
 const fmtMonth = (d: Date) => d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
@@ -103,8 +107,6 @@ function Legend({ items }: { items: Array<{ label: string; color: string; dashed
 }
 
 /* ── Line chart ─────────────────────────────────────────── */
-type HistoryDay = ReturnType<typeof buildHistory>[number];
-
 function LineChart({ data, target }: { data: HistoryDay[]; target: number }) {
   const W = 1000, H = 180, pad = { t: 14, r: 8, b: 22, l: 36 };
   const innerW = W - pad.l - pad.r, innerH = H - pad.t - pad.b;
@@ -248,24 +250,40 @@ function Heatmap({ history, target }: { history: HistoryDay[]; target: number })
     if (m !== lastM) { monthLabels.push({ i, label: fmtMonth(w[0].date) }); lastM = m; }
   });
 
-  const cellSize = 12, gap = 3;
+  const numWeeks = cells.length;
 
   return (
-    <div style={{ position: "relative" }}>
-      <div style={{ position: "relative", height: 14, marginBottom: 4, marginLeft: 18, fontFamily: "var(--font-geist-mono)", fontSize: 10, color: "var(--oh-fg-4)", textTransform: "uppercase" }}>
-        {monthLabels.map((m, idx) => (
-          <span key={idx} style={{ position: "absolute", left: m.i * (cellSize + gap) }}>{m.label}</span>
-        ))}
+    <div style={{ position: "relative", width: "100%" }}>
+      {/* Month labels */}
+      <div style={{
+        display: "grid", gridTemplateColumns: `28px repeat(${numWeeks}, 1fr)`,
+        marginBottom: 4, fontFamily: "var(--font-geist-mono)", fontSize: 10,
+        color: "var(--oh-fg-4)", textTransform: "uppercase",
+      }}>
+        <span />
+        {cells.map((w, i) => {
+          const ml = monthLabels.find(m => m.i === i);
+          return <span key={i}>{ml ? ml.label : ""}</span>;
+        })}
       </div>
-      <div style={{ display: "flex", gap: 4 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap, fontSize: 9, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)" }}>
+
+      {/* Grid */}
+      <div style={{ display: "flex", gap: 4, width: "100%" }}>
+        {/* Day labels */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 3, fontSize: 9, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)", width: 24, flexShrink: 0 }}>
           {["", "Seg", "", "Qua", "", "Sex", ""].map((lbl, i) => (
-            <span key={i} style={{ height: cellSize, lineHeight: `${cellSize}px`, width: 14, display: "inline-block" }}>{lbl}</span>
+            <span key={i} style={{ height: 13, lineHeight: "13px", display: "block" }}>{lbl}</span>
           ))}
         </div>
-        <div style={{ display: "flex", gap }}>
+        {/* Week columns */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${numWeeks}, 1fr)`,
+          gap: 3,
+          flex: 1,
+        }}>
           {cells.map((w, i) => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", gap }}>
+            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
               {w.map((c, j) => {
                 const lv = intensity(c.data);
                 return (
@@ -273,7 +291,7 @@ function Heatmap({ history, target }: { history: HistoryDay[]; target: number })
                     onMouseEnter={() => c.data && setHover({ ...c.data, x: i, y: j })}
                     onMouseLeave={() => setHover(null)}
                     style={{
-                      width: cellSize, height: cellSize, borderRadius: 3,
+                      aspectRatio: "1", borderRadius: 3,
                       background: bgColor(lv),
                       border: `1px solid ${lv === 0 ? "var(--oh-border)" : "oklch(1 0 0 / 0.04)"}`,
                       cursor: c.data ? "pointer" : "default",
@@ -285,6 +303,8 @@ function Heatmap({ history, target }: { history: HistoryDay[]; target: number })
           ))}
         </div>
       </div>
+
+      {/* Legend */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, fontSize: 10, color: "var(--oh-fg-4)", fontFamily: "var(--font-geist-mono)" }}>
         <span>Menos</span>
         {[0, 1, 2, 3, 4].map(l => (
@@ -292,10 +312,11 @@ function Heatmap({ history, target }: { history: HistoryDay[]; target: number })
         ))}
         <span>Mais próximo da meta</span>
       </div>
+
       {hover && (
         <div style={{
           position: "absolute", pointerEvents: "none", top: -40,
-          left: 18 + hover.x * (cellSize + gap),
+          left: `calc(28px + ${hover.x / numWeeks * 100}%)`,
           padding: "6px 9px",
           background: "var(--oh-bg-2)",
           border: "1px solid var(--oh-border-strong)",
@@ -492,8 +513,20 @@ function RangeTabs({ value, onChange }: { value: RangeId; onChange: (v: RangeId)
 /* ── Main component ─────────────────────────────────────── */
 export function OverviewSection({ targets, onGoToToday }: { targets: DailyTargets; onGoToToday?: () => void }) {
   const [range, setRange] = useState<RangeId>("30");
+  const [apiData, setApiData] = useState<DailyNutrition[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const history = useMemo(() => buildHistory(targets.kcal, targets.prot), [targets.kcal, targets.prot]);
+  useEffect(() => {
+    const today = new Date();
+    const from = new Date(today);
+    from.setDate(today.getDate() - 180);
+    setLoading(true);
+    api.nutrition.daily({ from: isoDate(from), to: isoDate(today) })
+      .then(d => { setApiData(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const history = useMemo(() => buildHistoryFromApi(apiData, 180), [apiData]);
   const days = parseInt(range, 10);
   const windowed = useMemo(() => history.slice(-days), [history, days]);
 
@@ -520,6 +553,19 @@ export function OverviewSection({ targets, onGoToToday }: { targets: DailyTarget
 
     return { avgKcal, avgProt, adherencePct, targetHitPct, deltaKcal, streak, loggedDays: loggedDays.length };
   }, [windowed, history, targets]);
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <Skeleton className="h-8 w-48 rounded-lg" style={{ background: "var(--oh-bg-3)" }} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+          {[1,2,3,4].map(i => <Skeleton key={i} className="h-24 rounded-[14px]" style={{ background: "var(--oh-bg-3)" }} />)}
+        </div>
+        <Skeleton className="h-52 w-full rounded-[18px]" style={{ background: "var(--oh-bg-3)" }} />
+        <Skeleton className="h-64 w-full rounded-[18px]" style={{ background: "var(--oh-bg-3)" }} />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>

@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   TrendingUp, Clock, Layers, UtensilsCrossed, Settings,
-  Utensils, Sparkles,
+  Utensils,
 } from "lucide-react";
 
 export type SectionId = "overview" | "today" | "saved" | "foods" | "settings";
@@ -10,17 +11,17 @@ export type SectionId = "overview" | "today" | "saved" | "foods" | "settings";
 interface Section {
   id: SectionId;
   label: string;
+  labelShort: string;
   icon: React.ElementType;
-  badge?: number;
   group?: string;
 }
 
 const SECTIONS: Section[] = [
-  { id: "overview",  label: "Visão geral",      icon: TrendingUp },
-  { id: "today",     label: "Hoje",              icon: Clock },
-  { id: "saved",     label: "Refeições salvas",  icon: Layers },
-  { id: "foods",     label: "Alimentos",         icon: UtensilsCrossed },
-  { id: "settings",  label: "Configurações",     icon: Settings, group: "Preferências" },
+  { id: "overview",  label: "Visão geral",      labelShort: "Visão",     icon: TrendingUp },
+  { id: "today",     label: "Hoje",              labelShort: "Hoje",      icon: Clock },
+  { id: "saved",     label: "Refeições salvas",  labelShort: "Salvas",    icon: Layers },
+  { id: "foods",     label: "Alimentos",         labelShort: "Alimentos", icon: UtensilsCrossed },
+  { id: "settings",  label: "Configurações",     labelShort: "Config",    icon: Settings, group: "Preferências" },
 ];
 
 interface Props {
@@ -30,7 +31,72 @@ interface Props {
   targetsUpdatedAt?: string;
 }
 
-export function SubSidebar({ current, onChange, badges, targetsUpdatedAt }: Props) {
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return mobile;
+}
+
+export function SubSidebar({ current, onChange, badges }: Props) {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <nav style={{
+        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
+        display: "flex", alignItems: "stretch",
+        background: "var(--oh-bg-2)",
+        backdropFilter: "blur(20px) saturate(140%)",
+        WebkitBackdropFilter: "blur(20px) saturate(140%)",
+        borderTop: "1px solid var(--oh-border)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}>
+        {SECTIONS.map(s => {
+          const isActive = current === s.id;
+          const IconComp = s.icon;
+          const badge = badges?.[s.id];
+          return (
+            <button key={s.id} onClick={() => onChange(s.id)} style={{
+              flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              gap: 4, padding: "10px 4px 8px",
+              background: "transparent", border: "none", cursor: "pointer",
+              color: isActive ? "var(--oh-accent)" : "var(--oh-fg-3)",
+              transition: "color 0.15s", position: "relative",
+            }}>
+              {isActive && (
+                <span style={{
+                  position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+                  width: 28, height: 2, borderRadius: 2, background: "var(--oh-accent)",
+                }} />
+              )}
+              <div style={{ position: "relative" }}>
+                <IconComp size={20} />
+                {badge != null && (
+                  <span style={{
+                    position: "absolute", top: -5, right: -7,
+                    fontSize: 9, fontFamily: "var(--font-geist-mono)",
+                    padding: "1px 4px", borderRadius: 5,
+                    background: "var(--oh-accent)", color: "var(--oh-accent-fg)",
+                    lineHeight: 1.4,
+                  }}>{badge}</span>
+                )}
+              </div>
+              <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 400, letterSpacing: "-0.01em" }}>
+                {s.labelShort}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+    );
+  }
+
   const groups = SECTIONS.reduce<Record<string, Section[]>>((acc, s) => {
     const g = s.group ?? "__main";
     (acc[g] = acc[g] ?? []).push(s);
@@ -47,13 +113,14 @@ export function SubSidebar({ current, onChange, badges, targetsUpdatedAt }: Prop
       backdropFilter: "blur(18px) saturate(140%)",
       WebkitBackdropFilter: "blur(18px) saturate(140%)",
       display: "flex", flexDirection: "column", gap: 18,
-      position: "sticky", top: 0, height: "100vh",
+      height: "100%", overflowY: "auto",
     }}>
       {/* Module header */}
       <div style={{
         display: "flex", alignItems: "center", gap: 10,
         padding: "6px 10px 14px",
         borderBottom: "1px solid var(--oh-border)",
+        flexShrink: 0,
       }}>
         <div style={{
           width: 28, height: 28, borderRadius: 9,
@@ -72,7 +139,7 @@ export function SubSidebar({ current, onChange, badges, targetsUpdatedAt }: Prop
       </div>
 
       {/* Nav groups */}
-      <nav style={{ display: "flex", flexDirection: "column", gap: 14, flex: 1, overflow: "auto" }}>
+      <nav style={{ display: "flex", flexDirection: "column", gap: 14, flex: 1 }}>
         {orderedGroups.map(g => (
           <div key={g} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {g !== "__main" && (
@@ -139,18 +206,6 @@ export function SubSidebar({ current, onChange, badges, targetsUpdatedAt }: Prop
           </div>
         ))}
       </nav>
-
-      {/* Footer */}
-      <div style={{
-        padding: "10px 12px", borderRadius: 10,
-        background: "var(--oh-bg-3)", border: "1px solid var(--oh-border)",
-        display: "flex", alignItems: "center", gap: 10,
-      }}>
-        <Sparkles size={13} style={{ color: "var(--oh-fg-3)", flexShrink: 0 }} />
-        <span style={{ fontSize: 11.5, color: "var(--oh-fg-3)", lineHeight: 1.35 }}>
-          {targetsUpdatedAt ?? "Metas configuradas"}
-        </span>
-      </div>
     </aside>
   );
 }

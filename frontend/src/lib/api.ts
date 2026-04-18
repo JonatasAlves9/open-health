@@ -41,7 +41,27 @@ export type Meal = {
   createdAt: string;
 };
 
+export type DailyNutrition = {
+  date: string;
+  kcal: number;
+  prot: number;
+  carb: number;
+  fat: number;
+  meals: number;
+};
+
 export const api = {
+  nutrition: {
+    daily: (params: { from: string; to: string }) =>
+      request<DailyNutrition[]>(`/api/nutrition/daily?from=${params.from}&to=${params.to}`),
+  },
+  settings: {
+    get: () => request<Record<string, unknown>>("/api/settings"),
+    put: (key: string, value: unknown) =>
+      request<{ key: string; value: unknown }>(`/api/settings/${key}`, {
+        method: "PUT", body: JSON.stringify(value),
+      }),
+  },
   foods: {
     list: (q?: string) =>
       request<Food[]>(`/api/foods${q ? `?q=${encodeURIComponent(q)}` : ""}`),

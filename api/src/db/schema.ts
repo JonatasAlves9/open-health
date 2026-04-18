@@ -29,6 +29,12 @@ export const meals = sqliteTable("meals", {
     .default(sql`(datetime('now'))`),
 });
 
+export const nutritionSettings = sqliteTable("nutrition_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`(datetime('now'))`),
+});
+
 export const mealItems = sqliteTable("meal_items", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   mealId: integer("meal_id")

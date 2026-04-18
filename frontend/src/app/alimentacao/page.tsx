@@ -9,18 +9,9 @@ import { FoodSearch } from "@/components/alimentacao/food-search";
 import { OverviewSection } from "@/components/alimentacao/overview";
 import { SettingsSection, DEFAULT_TARGETS, type DailyTargets } from "@/components/alimentacao/settings-section";
 import { NewMealDialog } from "@/components/alimentacao/new-meal-dialog";
+import { api } from "@/lib/api";
 
-const STORAGE_KEY = "openhealth-targets";
-
-function loadTargets(): DailyTargets {
-  if (typeof window === "undefined") return DEFAULT_TARGETS;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : DEFAULT_TARGETS;
-  } catch {
-    return DEFAULT_TARGETS;
-  }
-}
+const SETTINGS_KEY = "daily_targets";
 
 const SECTION_HEADERS: Record<SectionId, { title: string; subtitle: string; showAdd?: boolean }> = {
   overview:  { title: "Visão geral",      subtitle: "Panorama nutricional — tendências e consistência." },
@@ -35,11 +26,16 @@ export default function AlimentacaoPage() {
   const [showDialog, setShowDialog] = useState(false);
   const [targets, setTargets] = useState<DailyTargets>(DEFAULT_TARGETS);
 
-  useEffect(() => { setTargets(loadTargets()); }, []);
+  useEffect(() => {
+    api.settings.get().then(s => {
+      const saved = s[SETTINGS_KEY] as DailyTargets | undefined;
+      if (saved && typeof saved.kcal === "number") setTargets(saved);
+    }).catch(() => {});
+  }, []);
 
   const handleTargetsChange = (t: DailyTargets) => {
     setTargets(t);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(t));
+    api.settings.put(SETTINGS_KEY, t).catch(() => {});
   };
 
   const header = SECTION_HEADERS[section];
@@ -49,7 +45,7 @@ export default function AlimentacaoPage() {
     <>
       <NewMealDialog open={showDialog} onClose={() => setShowDialog(false)} onSaved={() => {}} defaultTemplate={section === "saved"} />
 
-      <div style={{ display: "flex", minHeight: "100vh" }}>
+      <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
         <SubSidebar
           current={section}
           onChange={setSection}
@@ -57,8 +53,8 @@ export default function AlimentacaoPage() {
         />
 
         <div style={{
-          flex: 1, minWidth: 0, overflow: "auto",
-          padding: `${36 * density}px ${44 * density}px ${60 * density}px`,
+          flex: 1, minWidth: 0, overflowY: "auto",
+          padding: `${36 * density}px ${44 * density}px ${80 * density}px`,
         }}>
           {/* Page header */}
           <div style={{ marginBottom: 28, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>

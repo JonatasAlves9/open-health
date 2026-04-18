@@ -8,6 +8,13 @@
       "when": 1776479203679,
       "tag": "0000_panoramic_marvel_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1745002800000,
+      "tag": "0001_nutrition_settings",
+      "breakpoints": true
     }
   ]
 }
