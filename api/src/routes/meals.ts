@@ -98,7 +98,7 @@ export const mealsRouter = new Hono()
       .values({
         name: template.name,
         isTemplate: false,
-        loggedAt: new Date().toISOString(),
+        loggedAt: new Date().toLocaleString("sv-SE", { timeZoneName: undefined }).replace(" ", "T"),
         notes: template.notes,
       })
       .returning();

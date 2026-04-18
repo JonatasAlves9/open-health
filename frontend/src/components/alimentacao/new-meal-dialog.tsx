@@ -95,7 +95,7 @@ export function NewMealDialog({ open, onClose, onSaved, defaultTemplate = false,
     try {
       const payload = {
         name, isTemplate,
-        loggedAt: isTemplate ? undefined : new Date().toISOString(),
+        loggedAt: isTemplate ? undefined : new Date().toLocaleString("sv-SE").replace(" ", "T"),
         items: items.map(i => ({ foodId: i.food.id, quantity: i.quantity, unit: i.unit })),
       };
       if (isEdit && editMeal) await api.meals.update(editMeal.id, payload);

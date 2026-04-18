@@ -33,7 +33,9 @@ function buildHistoryFromApi(data: DailyNutrition[], days: number): HistoryDay[]
   return out;
 }
 
-function isoDate(d: Date) { return d.toISOString().split("T")[0]; }
+function isoDate(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 /* ── Formatters ─────────────────────────────────────────── */
 const fmtMonth = (d: Date) => d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
