@@ -11,12 +11,15 @@ RUN npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ && \
+    addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src/db/migrations ./src/db/migrations
-RUN mkdir -p /data
+RUN mkdir -p /data && chown nodejs:nodejs /data
 ENV NODE_ENV=production
 ENV DATABASE_URL=/data/open-health.db
+USER nodejs
 EXPOSE 3001
 CMD ["node", "dist/index.js"]
