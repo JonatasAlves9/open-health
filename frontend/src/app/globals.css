@@ -1,0 +1,132 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+}
+
+/* ── Design tokens ─────────────────────────────────────── */
+:root {
+  --oh-bg:            oklch(0.16 0.006 260);
+  --oh-bg-2:          oklch(0.20 0.006 260);
+  --oh-bg-3:          oklch(0.24 0.008 260);
+  --oh-surface:       oklch(0.22 0.006 260 / 0.6);
+  --oh-surface-2:     oklch(0.26 0.006 260 / 0.5);
+  --oh-border:        oklch(1 0 0 / 0.08);
+  --oh-border-strong: oklch(1 0 0 / 0.14);
+  --oh-fg:            oklch(0.98 0 0);
+  --oh-fg-2:          oklch(0.85 0.005 260);
+  --oh-fg-3:          oklch(0.65 0.008 260);
+  --oh-fg-4:          oklch(0.48 0.008 260);
+  --oh-accent:        oklch(0.92 0 0);
+  --oh-accent-fg:     oklch(0.15 0 0);
+  --oh-accent-soft:   oklch(0.92 0 0 / 0.12);
+  --oh-success:       oklch(0.78 0.14 155);
+  --oh-danger:        oklch(0.70 0.18 25);
+  --oh-protein:       oklch(0.78 0.14 25);
+  --oh-carbs:         oklch(0.80 0.13 85);
+  --oh-fat:           oklch(0.78 0.14 230);
+  --oh-shadow-sm:     0 1px 2px oklch(0 0 0 / 0.3);
+  --oh-shadow:        0 8px 24px oklch(0 0 0 / 0.35), 0 2px 6px oklch(0 0 0 / 0.2);
+  --oh-shadow-lg:     0 24px 60px oklch(0 0 0 / 0.5), 0 8px 20px oklch(0 0 0 / 0.3);
+
+  /* shadcn compat */
+  --background: oklch(0.16 0.006 260);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.22 0.006 260);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.20 0.006 260);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.92 0 0);
+  --primary-foreground: oklch(0.15 0 0);
+  --secondary: oklch(0.24 0.008 260);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.24 0.008 260);
+  --muted-foreground: oklch(0.65 0.008 260);
+  --accent: oklch(0.24 0.008 260);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.70 0.18 25);
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(1 0 0 / 0.08);
+  --ring: oklch(0.92 0 0);
+  --radius: 0.75rem;
+}
+
+/* ── Global styles ─────────────────────────────────────── */
+@layer base {
+  * { box-sizing: border-box; font-family: inherit; }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+    color: var(--oh-fg);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, oklch(0.28 0.02 280 / 0.5), transparent 60%),
+      radial-gradient(900px 500px at 110% 110%, oklch(0.28 0.02 200 / 0.35), transparent 60%),
+      var(--oh-bg);
+    min-height: 100vh;
+    color: var(--oh-fg);
+  }
+
+  ::selection { background: var(--oh-accent); color: var(--oh-accent-fg); }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--oh-border-strong); border-radius: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* ── Animations ────────────────────────────────────────── */
+@keyframes oh-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes oh-scale-in {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes oh-slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.oh-fade-in   { animation: oh-fade-in  0.35s ease both; }
+.oh-scale-in  { animation: oh-scale-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.oh-slide-down { animation: oh-slide-down 0.3s ease both; }
+
+/* ── Glass utility ─────────────────────────────────────── */
+.oh-glass {
+  background: var(--oh-surface);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--oh-border);
+}
