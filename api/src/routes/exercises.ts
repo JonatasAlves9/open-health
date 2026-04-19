@@ -42,6 +42,7 @@ async function searchWger(term: string): Promise<typeof exercises.$inferSelect[]
       return {
         id: -(ex.id),
         name: translation?.name ?? `Exercise ${ex.id}`,
+        namePt: null,
         muscleGroup: mapWgerCategory(ex.category?.name ?? ""),
         equipment: ex.equipment?.[0]?.name ?? null,
         wgerId: ex.id,
