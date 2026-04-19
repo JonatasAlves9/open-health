@@ -29,6 +29,54 @@ export const meals = sqliteTable("meals", {
     .default(sql`(datetime('now'))`),
 });
 
+export const exercises = sqliteTable("exercises", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  namePt: text("name_pt"),
+  muscleGroup: text("muscle_group").notNull().default("outro"),
+  equipment: text("equipment"),
+  wgerId: integer("wger_id"),
+  gifUrl: text("gif_url"),
+  description: text("description"),
+  source: text("source").notNull().default("manual"), // manual | wger | free-exercise-db
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+});
+
+export const workoutSessions = sqliteTable("workout_sessions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  isTemplate: integer("is_template", { mode: "boolean" }).notNull().default(false),
+  loggedAt: text("logged_at"),
+  notes: text("notes"),
+  kcalBurned: real("kcal_burned"),
+  bodyWeightKg: real("body_weight_kg"),
+  templateId: integer("template_id"),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+});
+
+export const workoutSets = sqliteTable("workout_sets", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  sessionId: integer("session_id").notNull().references(() => workoutSessions.id, { onDelete: "cascade" }),
+  exerciseId: integer("exercise_id").notNull().references(() => exercises.id),
+  setNumber: integer("set_number").notNull(),
+  reps: integer("reps"),
+  weightKg: real("weight_kg"),
+  rpe: real("rpe"),
+  notes: text("notes"),
+});
+
+export const cardioSessions = sqliteTable("cardio_sessions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  sessionId: integer("session_id").notNull().references(() => workoutSessions.id, { onDelete: "cascade" }),
+  exerciseId: integer("exercise_id").references(() => exercises.id, { onDelete: "set null" }),
+  modality: text("modality").notNull().default("outro"), // corrida | caminhada | bike | natacao | outro
+  durationMin: real("duration_min").notNull(),
+  distanceKm: real("distance_km"),
+  intensity: text("intensity").notNull().default("moderada"), // leve | moderada | intensa
+  kcalBurned: real("kcal_burned"),
+  notes: text("notes"),
+});
+
 export const nutritionSettings = sqliteTable("nutrition_settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),

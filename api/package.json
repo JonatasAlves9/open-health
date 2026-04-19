@@ -9,7 +9,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "seed:taco": "tsx src/scripts/seed-taco.ts"
+    "seed:taco": "tsx src/scripts/seed-taco.ts",
+    "seed:exercises": "tsx src/scripts/seed-exercises.ts",
+    "translate:exercises": "tsx src/scripts/translate-exercises.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
