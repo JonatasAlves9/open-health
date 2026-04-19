@@ -1,4 +1,5 @@
 import { db } from "../db/index.js";
+import { runMigrations } from "../db/migrate.js";
 import { exercises } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { existsSync, mkdirSync } from "fs";
@@ -41,6 +42,8 @@ type RawExercise = {
 };
 
 async function main() {
+  runMigrations();
+
   if (!existsSync(EXERCISES_JSON)) {
     console.error(`❌ Arquivo de exercícios não encontrado em: ${EXERCISES_JSON}`);
     console.error("   Em dev: clone com git clone --depth=1 https://github.com/yuhonas/free-exercise-db.git");
