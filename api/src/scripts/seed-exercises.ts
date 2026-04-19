@@ -41,9 +41,9 @@ type RawExercise = {
 };
 
 async function main() {
-  if (!existsSync(REPO_DIR)) {
-    console.error(`❌ Repositório não encontrado em: ${REPO_DIR}`);
-    console.error("   Clone com: git clone --depth=1 https://github.com/yuhonas/free-exercise-db.git");
+  if (!existsSync(EXERCISES_JSON)) {
+    console.error(`❌ Arquivo de exercícios não encontrado em: ${EXERCISES_JSON}`);
+    console.error("   Em dev: clone com git clone --depth=1 https://github.com/yuhonas/free-exercise-db.git");
     process.exit(1);
   }
 
