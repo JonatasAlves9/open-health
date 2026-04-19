@@ -1,12 +1,12 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
-COPY package*.json ./
+COPY api/package*.json ./
 RUN npm ci
 
 FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY api/ .
 RUN npm run build
 
 FROM node:22-alpine AS runner
@@ -17,7 +17,9 @@ RUN apk add --no-cache python3 make g++ && \
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src/db/migrations ./dist/db/migrations
-RUN mkdir -p /data && chown nodejs:nodejs /data
+# Exercise images served from this directory
+COPY free-exercise-db/exercises ./data/exercise-images
+RUN mkdir -p /data && chown -R nodejs:nodejs /data ./data
 ENV NODE_ENV=production
 ENV DATABASE_URL=/data/open-health.db
 USER nodejs
