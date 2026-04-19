@@ -7,10 +7,10 @@ import { fileURLToPath } from "url";
 import { readFile } from "fs/promises";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_DIR = join(__dirname, "../../../free-exercise-db");
-const EXERCISES_JSON = join(REPO_DIR, "dist/exercises.json");
-const REPO_IMAGES_DIR = join(REPO_DIR, "exercises");
-// Images are served directly from the repo — no copy needed
+// Dev: ../../../free-exercise-db/dist/exercises.json | Prod: ../data/exercises.json (bundled in image)
+const EXERCISES_JSON_PROD = join(__dirname, "../../data/exercises.json");
+const EXERCISES_JSON_DEV  = join(__dirname, "../../../free-exercise-db/dist/exercises.json");
+const EXERCISES_JSON = existsSync(EXERCISES_JSON_PROD) ? EXERCISES_JSON_PROD : EXERCISES_JSON_DEV;
 
 const MUSCLE_MAP: Record<string, string> = {
   abdominals: "core", abductors: "pernas", adductors: "pernas",

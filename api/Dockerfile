@@ -17,8 +17,9 @@ RUN apk add --no-cache python3 make g++ && \
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src/db/migrations ./dist/db/migrations
-# Exercise images served from this directory
+# Exercise images and metadata for seed script
 COPY free-exercise-db/exercises ./data/exercise-images
+COPY free-exercise-db/dist/exercises.json ./data/exercises.json
 RUN mkdir -p /data && chown -R nodejs:nodejs /data ./data
 ENV NODE_ENV=production
 ENV DATABASE_URL=/data/open-health.db
